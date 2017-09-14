@@ -3,7 +3,7 @@ use \Firebase\JWT\JWT;
 
 class Controller_Base extends Controller_Rest {
     protected $format = 'json';
-    protected $key = "example_key";
+    protected $key = 'hifood2017:azf56vqu';
     /**
      *
      * get response code
@@ -44,14 +44,24 @@ class Controller_Base extends Controller_Rest {
         );
 
 
-        $jwt = JWT::encode($token, $this->key);
+        $jwt = JWT::encode($token, base64_encode($this->key));
         return $jwt;
     }
 
-    public function getToken($jwt) {
-        list($jwt) = sscanf($jwt, 'Bearer %s');
+    public function updateToken() {
+        
+    }
 
-        $token = JWT::decode($jwt, $this->key, array('HS256'));
+    public function getToken($token) {
+        $token = JWT::decode($token, $this->key, array('HS256'));
         return $token;
+    }
+
+    private function checkAuthorization($auth) {
+        list($auth) = sscanf($auth, 'Bearer %s');
+        if (base64_decode($auth) === $this->key)
+            return true;
+
+        return false;
     }
 }
