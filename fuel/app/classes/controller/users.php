@@ -69,8 +69,9 @@ class Controller_Users extends Controller_Base {
         // get params
         $username = Security::clean(Input::json('username'), $this->_filter);
         $password = Security::clean(Input::json('password'), $this->_filter);
+        $data = new stdClass();
 
-        $data = array(
+        $data->user_info = array(
             'username' => $username,
             'password' => $password
         );
@@ -107,11 +108,20 @@ class Controller_Users extends Controller_Base {
      */
     public function put_update() {
         $jwt = \Input::headers('Authorization');
+
+        $access_token = \Input::headers('access-token');
+        $data = new stdClass();
+        $data->user_info = ['iat' => ISSUED_AT, 'nbf' => NOT_BEFORE, 'exp' => EXPIRED];
+        
+        $token = $this->checkToken($access_token);
+
+        if (isset($token->success) && $token->success === false)
+            return $this->get_response(true, '', false, $token->messages);
+        
         // $jwt = $response->get_header('Authorization');
 
-        $token = $this->getToken($jwt);
-        return $this->get_response(200, $token);
-        return $token;
+        // $token = $this->getToken($jwt);
+        return $this->get_response(200, $data, $access_token);
     }
 
     /**
